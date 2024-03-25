@@ -1,6 +1,9 @@
 #include "AndroidOut.h"
 #include "Renderer.h"
 
+#include "swappy/swappyGL.h"
+#include "swappy/swappyGL_extra.h"
+
 #include <game-activity/native_app_glue/android_native_app_glue.h>
 #include <GLES3/gl3.h>
 #include <cassert>
@@ -19,6 +22,7 @@ namespace Solar {
         out << "Initializing renderer" << std::endl;
 
         display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+
         assert(eglInitialize(display, nullptr, nullptr) == EGL_TRUE);
         EGLConfig config = getConfig();
         surface = eglCreateWindowSurface(display, config, app->window, nullptr);
@@ -37,6 +41,7 @@ namespace Solar {
     Renderer::~Renderer()
     {
         out << "Deleting renderer" << std::endl;
+
         if (display != EGL_NO_DISPLAY) {
             assert(eglMakeCurrent(display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT) == EGL_TRUE);
             if (context != EGL_NO_CONTEXT)
@@ -116,7 +121,7 @@ namespace Solar {
         }
         scene.getBuffer().unbind();
         shader->deactivate();
-        assert(eglSwapBuffers(display, surface) == EGL_TRUE);
+        assert(SwappyGL_swap(display, surface));
     }
 
     float Renderer::getAspect() const

@@ -18,7 +18,7 @@ namespace Solar {
         void init(android_app *app);
         void release();
 
-        bool reset = false;
+        JNIEnv *jniEnv;
 
     private:
         android_app *app;
@@ -26,7 +26,6 @@ namespace Solar {
         Scene scene;
         float xDown;
         float yDown;
-        bool validContext;
     };
 
 }
