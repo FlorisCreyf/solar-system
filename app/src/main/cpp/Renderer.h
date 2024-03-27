@@ -1,12 +1,11 @@
 #ifndef SOLARSYSTEM_RENDERER_H
 #define SOLARSYSTEM_RENDERER_H
 
-#include <EGL/egl.h>
-#include <memory>
-
 #include "Buffer.h"
 #include "Shader.h"
 #include "Scene.h"
+#include <EGL/egl.h>
+#include <memory>
 
 extern "C" struct android_app;
 
@@ -28,7 +27,7 @@ namespace Solar {
         EGLContext context;
         EGLint width;
         EGLint height;
-        std::unique_ptr<Shader> shader;
+        Shader *shader;
 
         EGLConfig getConfig();
     };

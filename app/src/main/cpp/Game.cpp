@@ -1,9 +1,9 @@
-#include <assert.h>
 #include "Game.h"
 #include "Arrow.h"
 
 #include "swappy/swappyGL.h"
 #include "swappy/swappyGL_extra.h"
+#include <cassert>
 
 namespace Solar {
 
@@ -13,22 +13,23 @@ namespace Solar {
         scene(),
         jniEnv(nullptr)
     {
+        app->activity->vm->AttachCurrentThread(&jniEnv, NULL);
+        assert(SwappyGL_init(jniEnv, app->activity->javaGameActivity));
+        SwappyGL_setSwapIntervalNS(SWAPPY_SWAP_20FPS);
     }
 
     Game::~Game()
     {
-        delete renderer;
+        SwappyGL_destroy();
+        app->activity->vm->AttachCurrentThread(&jniEnv, NULL);
+        release();
     }
 
     void Game::init(android_app *new_app)
     {
+        app = new_app;
         if (!renderer) {
-            out << "Creating game" << std::endl;
-            app = new_app;
-            app->activity->vm->AttachCurrentThread(&jniEnv, NULL);
-            SwappyGL_init(jniEnv, app->activity->javaGameActivity);
-            SwappyGL_setSwapIntervalNS(SWAPPY_SWAP_60FPS);
-            SwappyGL_setWindow(app->window);
+            assert(SwappyGL_setWindow(app->window));
             renderer = new Renderer(app);
             scene.load();
         }
@@ -36,12 +37,9 @@ namespace Solar {
 
     void Game::release()
     {
-        out << "Deleting game" << std::endl;
         scene.unload();
         delete renderer;
         renderer = nullptr;
-        jniEnv = nullptr;
-        SwappyGL_destroy();
     }
 
     void Game::execute()

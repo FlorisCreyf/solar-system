@@ -16,7 +16,6 @@ namespace Solar {
     void Scene::load()
     {
         if (objects.empty()) {
-            out << "Creating scene" << std::endl;
             buffer.add(ship);
             buffer.add(star);
             objects.push_back(&ship);
@@ -27,7 +26,6 @@ namespace Solar {
 
     void Scene::unload()
     {
-        out << "Unloading scene" << std::endl;
         objects.clear();
         buffer.clear();
     }

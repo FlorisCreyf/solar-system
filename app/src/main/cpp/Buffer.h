@@ -1,9 +1,9 @@
 #ifndef MODEL_H
 #define MODEL_H
 
+#include "Object.h"
 #include <GLES3/gl3.h>
 #include <vector>
-#include "Object.h"
 
 namespace Solar {
 

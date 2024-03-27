@@ -1,10 +1,10 @@
 #ifndef SHADER_H
 #define SHADER_H
 
-#include <string>
-#include <GLES3/gl3.h>
 #include "Buffer.h"
 #include "Object.h"
+#include <GLES3/gl3.h>
+#include <string>
 
 namespace Solar {
 

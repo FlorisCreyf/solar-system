@@ -28,8 +28,6 @@ namespace Solar {
 
     Shader::Shader() : program(0)
     {
-        out << "Creating shader" << std::endl;
-
         const std::string vertexSource(vertex);
         const std::string fragmentSource(fragment);
 
@@ -70,7 +68,6 @@ namespace Solar {
 
     Shader::~Shader()
     {
-        out << "Deleting shader" << std::endl;
         if (program) {
             glDeleteProgram(program);
             program = 0;

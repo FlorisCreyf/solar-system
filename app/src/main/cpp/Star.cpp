@@ -1,5 +1,4 @@
 #include "Star.h"
-
 #include <cmath>
 
 namespace Solar {

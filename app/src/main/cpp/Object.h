@@ -1,8 +1,8 @@
 #ifndef SOLARSYSTEM_OBJECT_H
 #define SOLARSYSTEM_OBJECT_H
 
-#include <vector>
 #include "Vertex.h"
+#include <vector>
 
 namespace Solar {
 

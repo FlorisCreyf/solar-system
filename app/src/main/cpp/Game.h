@@ -1,11 +1,10 @@
 #ifndef SOLARSYSTEM_GAME_H
 #define SOLARSYSTEM_GAME_H
 
-#include <game-activity/native_app_glue/android_native_app_glue.h>
-
 #include "AndroidOut.h"
 #include "Renderer.h"
 #include "Scene.h"
+#include <game-activity/native_app_glue/android_native_app_glue.h>
 
 namespace Solar {
 

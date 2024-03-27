@@ -1,9 +1,7 @@
 #include "AndroidOut.h"
 #include "Renderer.h"
-
 #include "swappy/swappyGL.h"
 #include "swappy/swappyGL_extra.h"
-
 #include <game-activity/native_app_glue/android_native_app_glue.h>
 #include <GLES3/gl3.h>
 #include <cassert>
@@ -19,10 +17,7 @@ namespace Solar {
         width(0),
         height(0)
     {
-        out << "Initializing renderer" << std::endl;
-
         display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-
         assert(eglInitialize(display, nullptr, nullptr) == EGL_TRUE);
         EGLConfig config = getConfig();
         surface = eglCreateWindowSurface(display, config, app->window, nullptr);
@@ -35,13 +30,13 @@ namespace Solar {
         glDepthMask(GL_TRUE);
         glDepthFunc(GL_LEQUAL);
         assert(glGetError() == GL_NO_ERROR);
-        shader = std::unique_ptr<Shader>(new Shader);
+
+        shader = new Shader;
     }
 
     Renderer::~Renderer()
     {
-        out << "Deleting renderer" << std::endl;
-
+        delete shader;
         if (display != EGL_NO_DISPLAY) {
             assert(eglMakeCurrent(display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT) == EGL_TRUE);
             if (context != EGL_NO_CONTEXT)
@@ -77,14 +72,9 @@ namespace Solar {
             assert(eglGetConfigAttrib(display, configs[i], EGL_BLUE_SIZE, &green) == EGL_TRUE);
             assert(eglGetConfigAttrib(display, configs[i], EGL_BLUE_SIZE, &blue) == EGL_TRUE);
             assert(eglGetConfigAttrib(display, configs[i], EGL_DEPTH_SIZE, &depth) == EGL_TRUE);
-            out << "Found config with " << red << ", " << green << ", " << blue << ", "
-                 << depth << std::endl;
-            if (red == 8 && green == 8 && blue == 8 && depth == 24) {
+            if (red == 8 && green == 8 && blue == 8 && depth == 24)
                 config = configs[i];
-            }
         }
-        out << "Found " << numConfigs << " configs" << std::endl;
-        out << "Chose " << config << std::endl;
         return config;
     }
 
@@ -121,7 +111,10 @@ namespace Solar {
         }
         scene.getBuffer().unbind();
         shader->deactivate();
-        assert(SwappyGL_swap(display, surface));
+        if (SwappyGL_isEnabled())
+            SwappyGL_swap(display, surface);
+        else
+            eglSwapBuffers(display, surface);
     }
 
     float Renderer::getAspect() const

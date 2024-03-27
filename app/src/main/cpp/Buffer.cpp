@@ -29,8 +29,6 @@ namespace Solar {
 
     void Buffer::upload()
     {
-        out << "Uploading buffer to device" << std::endl;
-
         deleteVAO();
         glGenVertexArrays(1, &vao);
         glGenBuffers(2, buffers);
@@ -55,7 +53,6 @@ namespace Solar {
 
     void Buffer::clear()
     {
-        out << "Deleting buffer" << std::endl;
         deleteVAO();
         vertices.clear();
         indices.clear();

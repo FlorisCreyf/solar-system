@@ -1,10 +1,8 @@
-#include <jni.h>
-
 #include "AndroidOut.h"
 #include "Renderer.h"
 #include "Scene.h"
 #include "Game.h"
-
+#include <jni.h>
 #include <game-activity/GameActivity.cpp>
 #include <game-text-input/gametextinput.cpp>
 
@@ -37,8 +35,6 @@ bool motion_event_filter_func(const GameActivityMotionEvent *motionEvent)
 
 void android_main(struct android_app *app)
 {
-    Solar::out << "Calling main" << std::endl;
-
     if (!game)
         game = new Solar::Game(app);
 
@@ -47,10 +43,12 @@ void android_main(struct android_app *app)
 
     int events;
     android_poll_source *source;
+
     while (!app->destroyRequested) {
-        if (ALooper_pollAll(0, nullptr, &events, (void **)&source) >= 0)
+        if (ALooper_pollAll(0, nullptr, &events, (void **) &source) >= 0)
             if (source)
                 source->process(app, source);
+
         game->execute();
     }
 }
