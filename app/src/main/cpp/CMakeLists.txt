@@ -5,8 +5,21 @@ cmake_minimum_required(VERSION 3.22.1)
 
 project("solarsystem")
 
-# Creates your game shared library. The name must be the same as the
-# one used for loading in your Kotlin/Java or AndroidManifest.txt files.
+find_package(game-activity REQUIRED CONFIG)
+find_package(games-frame-pacing REQUIRED CONFIG)
+
+add_definitions("-DIMGUI_IMPL_OPENGL_ES3")
+
+set(IMGUI_DIR "../../../../thirdparty/imgui")
+add_library(imgui STATIC
+        ${IMGUI_DIR}/imgui_draw.cpp
+        ${IMGUI_DIR}/imgui_tables.cpp
+        ${IMGUI_DIR}/imgui_widgets.cpp
+        ${IMGUI_DIR}/imgui.cpp
+        ${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp
+)
+target_include_directories(imgui PRIVATE ${IMGUI_DIR})
+
 add_library(solarsystem SHARED
         main.cpp
         AndroidOut.cpp
@@ -16,23 +29,19 @@ add_library(solarsystem SHARED
         Scene.cpp
         Shader.cpp
         Ship.cpp
-        Star.cpp
+        Circle.cpp
+)
+target_include_directories(solarsystem PRIVATE
+        ${IMGUI_DIR}
 )
 
-# Searches for a package provided by the game activity dependency
-find_package(game-activity REQUIRED CONFIG)
-find_package(games-frame-pacing REQUIRED CONFIG)
-
-# Configure libraries CMake uses to link your target library.
 target_link_libraries(solarsystem
-        # The game activity
         game-activity::game-activity
         games-frame-pacing::swappy_static
-
-        # EGL and other dependent libraries required for drawing
-        # and interacting with Android system
         EGL
         GLESv3
         jnigraphics
         android
-        log)
+        log
+        imgui
+)

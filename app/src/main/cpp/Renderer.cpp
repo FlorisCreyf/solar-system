@@ -1,7 +1,10 @@
 #include "AndroidOut.h"
+#include "Matrix.h"
 #include "Renderer.h"
 #include "swappy/swappyGL.h"
 #include "swappy/swappyGL_extra.h"
+#include "backends/imgui_impl_opengl3.h"
+#include "imgui.h"
 #include <game-activity/native_app_glue/android_native_app_glue.h>
 #include <GLES3/gl3.h>
 #include <cassert>
@@ -25,17 +28,27 @@ namespace Solar {
         context = eglCreateContext(display, config, nullptr, &attributes[0]);
         assert(eglMakeCurrent(display, surface, surface, context));
 
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClearColor(0.1f, 0.1f, 0.2f, 1.0f);
         glEnable(GL_DEPTH_TEST);
         glDepthMask(GL_TRUE);
         glDepthFunc(GL_LEQUAL);
         assert(glGetError() == GL_NO_ERROR);
 
         shader = new Shader;
+
+        assert(eglQuerySurface(display, surface, EGL_WIDTH, &width) == EGL_TRUE);
+        assert(eglQuerySurface(display, surface, EGL_HEIGHT, &height) == EGL_TRUE);
+
+        ImGui::StyleColorsDark();
+        ImGui_ImplOpenGL3_Init(NULL);
+        ImGuiIO &io = ImGui::GetIO();
+        io.DisplaySize = ImVec2(width, height);
+        io.FontGlobalScale = 3;
     }
 
     Renderer::~Renderer()
     {
+        ImGui_ImplOpenGL3_Shutdown();
         delete shader;
         if (display != EGL_NO_DISPLAY) {
             assert(eglMakeCurrent(display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT) == EGL_TRUE);
@@ -80,10 +93,6 @@ namespace Solar {
 
     void Renderer::render(const Scene &scene)
     {
-        assert(glGetError() == GL_NO_ERROR);
-        assert(eglQuerySurface(display, surface, EGL_WIDTH, &width) == EGL_TRUE);
-        assert(eglQuerySurface(display, surface, EGL_HEIGHT, &height) == EGL_TRUE);
-
         glViewport(0, 0, width, height);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         assert(glGetError() == GL_NO_ERROR);
@@ -91,30 +100,66 @@ namespace Solar {
         auto objects = scene.getObjects();
         shader->activate();
         scene.getBuffer().bind();
-        Vector2 location = scene.getLocation();
         for (const Object *object : objects) {
             float transform[9];
-            memcpy(transform, object->transform, sizeof(float) * 9);
-            float aspect = getAspect();
-            if (width < height) {
-                transform[4] *= aspect;
-                transform[7] *= aspect;
-                transform[6] += location.x;
-                transform[7] += location.y * aspect;
-            } else {
-                transform[0] *= aspect;
-                transform[6] *= aspect;
-                transform[6] += location.x * aspect;
-                transform[7] += location.y;
-            }
+            getTransform(transform, scene, object);
             shader->draw(scene.getBuffer(), object->getAllocation(), transform);
         }
         scene.getBuffer().unbind();
         shader->deactivate();
+
+        glClear( GL_DEPTH_BUFFER_BIT);
+        drawText(scene);
+
         if (SwappyGL_isEnabled())
             SwappyGL_swap(display, surface);
         else
             eglSwapBuffers(display, surface);
+    }
+
+    void Renderer::getTransform(float transform[9], const Scene &scene, const Solar::Object *object)
+    {
+        Vector2 location = scene.getLocation();
+        float t1[9] = {};
+        float t2[9] = {};
+        object->getTransformation(t1);
+        float aspect = getAspect();
+        t2[0] = 1.0f;
+        t2[4] = 1.0f;
+        t2[8] = 1.0f;
+        if (width < height) {
+            t2[4] = aspect;
+            t2[6] = -location.x;
+            t2[7] = -location.y * aspect;
+        } else {
+            t2[0] = aspect;
+            t2[6] = -location.x * aspect;
+            t2[7] = -location.y;
+        }
+        multiply_mat3(transform, t2, t1);
+    }
+
+    void Renderer::drawText(const Solar::Scene &scene)
+    {
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui::NewFrame();
+        ImGuiIO& io = ImGui::GetIO();
+        ImVec2 windowPosition(0, 0);
+        ImVec2 windowSize(io.DisplaySize.x, io.DisplaySize.y);
+        ImGui::SetNextWindowPos(windowPosition);
+        ImGui::SetNextWindowSizeConstraints(windowSize, windowSize, NULL, NULL);
+        ImGuiWindowFlags windowFlags =
+                ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse |
+                ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBackground |
+                ImGuiWindowFlags_NoTitleBar;
+        ImGui::Begin("coords", nullptr, windowFlags);
+        ImGui::Text("Px: %.3f", scene.getLocation().x);
+        ImGui::Text("Py: %.3f", scene.getLocation().y);
+        ImGui::Text("Vx: %.3f", scene.getShip().velocity.x);
+        ImGui::Text("Vy: %.3f", scene.getShip().velocity.y);
+        ImGui::End();
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }
 
     float Renderer::getAspect() const

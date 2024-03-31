@@ -1,6 +1,6 @@
 #include "Game.h"
-#include "Arrow.h"
-
+#include "backends/imgui_impl_opengl3.h"
+#include "imgui.h"
 #include "swappy/swappyGL.h"
 #include "swappy/swappyGL_extra.h"
 #include <cassert>
@@ -15,11 +15,13 @@ namespace Solar {
     {
         app->activity->vm->AttachCurrentThread(&jniEnv, NULL);
         assert(SwappyGL_init(jniEnv, app->activity->javaGameActivity));
-        SwappyGL_setSwapIntervalNS(SWAPPY_SWAP_20FPS);
+        SwappyGL_setSwapIntervalNS(SWAPPY_SWAP_60FPS);
+        ImGui::CreateContext();
     }
 
     Game::~Game()
     {
+        ImGui::DestroyContext();
         SwappyGL_destroy();
         app->activity->vm->AttachCurrentThread(&jniEnv, NULL);
         release();
@@ -33,21 +35,39 @@ namespace Solar {
             renderer = new Renderer(app);
             scene.load();
         }
+        currentTime = std::chrono::high_resolution_clock::now();
     }
 
     void Game::release()
     {
         scene.unload();
-        delete renderer;
-        renderer = nullptr;
+        if (renderer) {
+            delete renderer;
+            renderer = nullptr;
+        }
     }
 
     void Game::execute()
     {
-        if (renderer) {
-            processInput();
-            renderer->render(scene);
+        if (!renderer)
+            return;
+
+        auto now = std::chrono::high_resolution_clock::now();
+        auto past = currentTime;
+        auto duration = std::chrono::duration_cast<std::chrono::duration<double>>(now - past);
+
+        if (duration.count() > 1.f/120.f) {
+            currentTime = now;
+            update(duration);
         }
+
+        processInput();
+        renderer->render(scene);
+    }
+
+    void Game::update(std::chrono::duration<double> duration)
+    {
+        scene.update(duration.count());
     }
 
     void Game::processInput()
@@ -67,29 +87,32 @@ namespace Solar {
                 case AMOTION_EVENT_ACTION_DOWN:
                 case AMOTION_EVENT_ACTION_POINTER_DOWN:
                     if (pointerIndex == 0) {
-                        xDown = x;
-                        yDown = y;
-                        scene.initUpdate();
+                        originalLocation = scene.getLocation();
+                        originalPointLocation = Vector2{x, y};
                     }
                     break;
                 case AMOTION_EVENT_ACTION_UP:
                 case AMOTION_EVENT_ACTION_POINTER_UP:
+                    scene.update(Ray{Vector2{}, Vector2{}});
                     break;
                 case AMOTION_EVENT_ACTION_MOVE:
                     if (pointerIndex == 0) {
                         float height = renderer->getHeight() / 2;
                         float width = renderer->getWidth() / 2;
-                        if (width < height) {
+                        if (width < height)
                             height *= renderer->getAspect();
-                        } else {
+                        else
                             width *= renderer->getAspect();
-                        }
-                        Arrow arrow{
-                            xDown/width,
-                            (height-yDown)/height,
-                            x/width,
-                            (height-y)/height};
-                        scene.update(arrow);
+                        float x1 = originalPointLocation.x/width;
+                        float y1 = (height-originalPointLocation.y)/height;
+                        float x2 = x/width;
+                        float y2 = (height-y)/height;
+                        Vector2 location{
+                            originalLocation.x + x2 - x1,
+                            originalLocation.y + y2 - y1
+                        };
+                        scene.update(Ray{originalLocation, location});
+//                        scene.update(location);
                     }
                     break;
             }

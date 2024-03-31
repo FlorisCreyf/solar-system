@@ -43,12 +43,10 @@ void android_main(struct android_app *app)
 
     int events;
     android_poll_source *source;
-
     while (!app->destroyRequested) {
         if (ALooper_pollAll(0, nullptr, &events, (void **) &source) >= 0)
             if (source)
                 source->process(app, source);
-
         game->execute();
     }
 }

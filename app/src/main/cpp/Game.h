@@ -2,9 +2,11 @@
 #define SOLARSYSTEM_GAME_H
 
 #include "AndroidOut.h"
+#include "Ray.h"
 #include "Renderer.h"
 #include "Scene.h"
 #include <game-activity/native_app_glue/android_native_app_glue.h>
+#include <chrono>
 
 namespace Solar {
 
@@ -20,11 +22,14 @@ namespace Solar {
         JNIEnv *jniEnv;
 
     private:
+        void update(std::chrono::duration<double> duration);
+
         android_app *app;
         Renderer *renderer;
         Scene scene;
-        float xDown;
-        float yDown;
+        Vector2 originalLocation;
+        Vector2 originalPointLocation;
+        std::chrono::high_resolution_clock::time_point currentTime;
     };
 
 }

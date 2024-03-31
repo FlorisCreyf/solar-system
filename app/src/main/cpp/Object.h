@@ -15,13 +15,22 @@ namespace Solar {
 
     class Object {
     public:
-        float transform[9] = {
-            1.0f, 0.0f, 0.0f,
-            0.0f, 1.0f, 0.0f,
-            0.0f, 0.0f, 1.0f};
-
         virtual std::vector<Vertex> getVertices() const = 0;
         virtual std::vector<unsigned> getIndices() const = 0;
+
+        virtual void getTransformation(float transform[9]) const
+        {
+            transform[0] = 1.0f;
+            transform[1] = 0.0f;
+            transform[2] = 0.0f;
+            transform[3] = 0.0f;
+            transform[4] = 1.0f;
+            transform[5] = 0.0f;
+            transform[6] = 0.0f;
+            transform[7] = 0.0f;
+            transform[8] = 1.0f;
+        }
+
         Allocation getAllocation() const
         {
             return alloc;
@@ -29,6 +38,11 @@ namespace Solar {
 
     private:
         Allocation alloc;
+        float transform[9] = {
+                1, 0, 0,
+                0, 1, 0,
+                0, 0, 1
+        };
 
         friend class Buffer;
     };

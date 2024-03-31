@@ -30,6 +30,8 @@ namespace Solar {
         Shader *shader;
 
         EGLConfig getConfig();
+        void getTransform(float transform[9], const Scene &scene, const Object *object);
+        void drawText(const Scene &scene);
     };
 
 }
