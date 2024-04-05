@@ -2,7 +2,8 @@
 #define SOLARSYSTEM_RENDERER_H
 
 #include "Buffer.h"
-#include "Shader.h"
+#include "shaders/BackgroundShader.h"
+#include "shaders/ObjectShader.h"
 #include "Scene.h"
 #include <EGL/egl.h>
 #include <memory>
@@ -27,7 +28,8 @@ namespace Solar {
         EGLContext context;
         EGLint width;
         EGLint height;
-        Shader *shader;
+        ObjectShader *objectShader;
+        BackgroundShader *backgroundShader;
 
         EGLConfig getConfig();
         void getTransform(float transform[9], const Scene &scene, const Object *object);

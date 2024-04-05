@@ -28,16 +28,17 @@ namespace Solar {
         context = eglCreateContext(display, config, nullptr, &attributes[0]);
         assert(eglMakeCurrent(display, surface, surface, context));
 
-        glClearColor(0.1f, 0.1f, 0.2f, 1.0f);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glEnable(GL_DEPTH_TEST);
         glDepthMask(GL_TRUE);
         glDepthFunc(GL_LEQUAL);
         assert(glGetError() == GL_NO_ERROR);
 
-        shader = new Shader;
-
         assert(eglQuerySurface(display, surface, EGL_WIDTH, &width) == EGL_TRUE);
         assert(eglQuerySurface(display, surface, EGL_HEIGHT, &height) == EGL_TRUE);
+
+        objectShader = new ObjectShader();
+        backgroundShader = new BackgroundShader(width, height);
 
         ImGui::StyleColorsDark();
         ImGui_ImplOpenGL3_Init(NULL);
@@ -49,7 +50,8 @@ namespace Solar {
     Renderer::~Renderer()
     {
         ImGui_ImplOpenGL3_Shutdown();
-        delete shader;
+        delete objectShader;
+        delete backgroundShader;
         if (display != EGL_NO_DISPLAY) {
             assert(eglMakeCurrent(display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT) == EGL_TRUE);
             if (context != EGL_NO_CONTEXT)
@@ -97,18 +99,28 @@ namespace Solar {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         assert(glGetError() == GL_NO_ERROR);
 
-        auto objects = scene.getObjects();
-        shader->activate();
         scene.getBuffer().bind();
+        objectShader->activate();
+        auto objects = scene.getObjects();
         for (const Object *object : objects) {
             float transform[9];
             getTransform(transform, scene, object);
-            shader->draw(scene.getBuffer(), object->getAllocation(), transform);
+            objectShader->draw(scene.getBuffer(), object->getAllocation(), transform);
         }
+        backgroundShader->activate();
+        const Background background = scene.getBackground();
+        Vector2 location = scene.getLocation();
+        float x = location.x/2.0f * width;
+        float y = location.y/2.0f * height;
+        if (width < height)
+            y *= getAspect();
+        else
+            x *= getAspect();
+        backgroundShader->draw(scene.getBuffer(), background.getAllocation(), x, y);
+        backgroundShader->deactivate();
         scene.getBuffer().unbind();
-        shader->deactivate();
 
-        glClear( GL_DEPTH_BUFFER_BIT);
+        glClear(GL_DEPTH_BUFFER_BIT);
         drawText(scene);
 
         if (SwappyGL_isEnabled())
@@ -149,9 +161,9 @@ namespace Solar {
         ImGui::SetNextWindowPos(windowPosition);
         ImGui::SetNextWindowSizeConstraints(windowSize, windowSize, NULL, NULL);
         ImGuiWindowFlags windowFlags =
-                ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse |
-                ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBackground |
-                ImGuiWindowFlags_NoTitleBar;
+            ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse |
+            ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBackground |
+            ImGuiWindowFlags_NoTitleBar;
         ImGui::Begin("coords", nullptr, windowFlags);
         ImGui::Text("Px: %.3f", scene.getLocation().x);
         ImGui::Text("Py: %.3f", scene.getLocation().y);

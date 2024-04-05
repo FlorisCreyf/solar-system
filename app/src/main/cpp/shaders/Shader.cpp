@@ -1,36 +1,12 @@
 #include "Shader.h"
-#include "AndroidOut.h"
-#include "Buffer.h"
+#include "../AndroidOut.h"
+#include "../Buffer.h"
 #include <cassert>
-
-static const char *vertex = R"vertex(#version 300 es
-layout(location = 0) in vec4 position;
-layout(location = 1) in vec4 color;
-uniform mat3 transform;
-out vec3 vertexColor;
-void main() {
-    vec3 pos = transform * vec3(position.xy, 1.0f);
-    gl_Position = vec4(pos.xy, position.z, 1.0f);
-    vertexColor = color.rgb;
-}
-)vertex";
-
-static const char *fragment = R"fragment(#version 300 es
-precision mediump float;
-in vec3 vertexColor;
-out vec3 color;
-void main() {
-    color = vertexColor;
-}
-)fragment";
 
 namespace Solar {
 
-    Shader::Shader() : program(0)
+    Shader::Shader(const std::string &vertexSource, const std::string &fragmentSource) : program(0)
     {
-        const std::string vertexSource(vertex);
-        const std::string fragmentSource(fragment);
-
         GLuint vertexShader = compileShader(GL_VERTEX_SHADER, vertexSource);
         if (!vertexShader) {
             return;
@@ -114,12 +90,9 @@ namespace Solar {
         glUseProgram(0);
     }
 
-    void Shader::draw(const Buffer &buffer, Allocation alloc, const float transform[9]) const
+    GLuint Shader::getProgram() const
     {
-        GLuint u = glGetUniformLocation(program, "transform");
-        glUniformMatrix3fv(u, 1, false, transform);
-        GLvoid *start = (GLvoid *)(alloc.indexStart * sizeof(unsigned));
-        glDrawElements(GL_TRIANGLES, alloc.indexCount, GL_UNSIGNED_INT, start);
+        return program;
     }
 
 }

@@ -27,9 +27,12 @@ add_library(solarsystem SHARED
         Game.cpp
         Renderer.cpp
         Scene.cpp
-        Shader.cpp
+        shaders/Shader.cpp
+        shaders/ObjectShader.cpp
+        shaders/BackgroundShader.cpp
         Ship.cpp
         Circle.cpp
+        Background.cpp
 )
 target_include_directories(solarsystem PRIVATE
         ${IMGUI_DIR}

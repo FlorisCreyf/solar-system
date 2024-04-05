@@ -3,6 +3,7 @@
 
 #include "Ray.h"
 #include "Buffer.h"
+#include "Background.h"
 #include "Object.h"
 #include "Ship.h"
 #include "Circle.h"
@@ -23,11 +24,13 @@ namespace Solar {
         const Buffer &getBuffer() const;
         std::vector<const Object *> getObjects() const;
         const Ship getShip() const;
+        const Background getBackground() const;
 
     private:
         Buffer buffer;
         Ship ship;
         Circle star;
+        Background background;
         std::vector<Circle> planets;
         std::vector<const Object *> objects;
         Vector2 location = {};

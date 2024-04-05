@@ -23,6 +23,7 @@ namespace Solar {
     void Scene::load()
     {
         if (objects.empty()) {
+            buffer.add(background);
             buffer.add(ship);
             buffer.add(star);
             objects.push_back(&ship);
@@ -126,6 +127,11 @@ namespace Solar {
     const Ship Scene::getShip() const
     {
         return ship;
+    }
+
+    const Background Scene::getBackground() const
+    {
+        return background;
     }
 
     const Buffer &Scene::getBuffer() const
