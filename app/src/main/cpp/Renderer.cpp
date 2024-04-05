@@ -44,7 +44,6 @@ namespace Solar {
         ImGui_ImplOpenGL3_Init(NULL);
         ImGuiIO &io = ImGui::GetIO();
         io.DisplaySize = ImVec2(width, height);
-        io.FontGlobalScale = 3;
     }
 
     Renderer::~Renderer()
@@ -165,10 +164,9 @@ namespace Solar {
             ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBackground |
             ImGuiWindowFlags_NoTitleBar;
         ImGui::Begin("coords", nullptr, windowFlags);
-        ImGui::Text("Px: %.3f", scene.getLocation().x);
-        ImGui::Text("Py: %.3f", scene.getLocation().y);
-        ImGui::Text("Vx: %.3f", scene.getShip().velocity.x);
-        ImGui::Text("Vy: %.3f", scene.getShip().velocity.y);
+        ImGui::Text("Position: (%.3f %.3f)", scene.getLocation().x, scene.getLocation().y);
+        Vector2 velocity = scene.getShip().velocity;
+        ImGui::Text("Velocity: %.3f", sqrt(velocity.x*velocity.x + velocity.y*velocity.y));
         ImGui::End();
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

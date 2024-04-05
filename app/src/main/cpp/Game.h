@@ -19,11 +19,9 @@ namespace Solar {
         void init(android_app *app);
         void release();
 
-        JNIEnv *jniEnv;
-
     private:
         void update(std::chrono::duration<double> duration);
-
+        JNIEnv *jniEnv;
         android_app *app;
         Renderer *renderer;
         Scene scene;

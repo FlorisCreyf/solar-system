@@ -16,7 +16,23 @@ namespace Solar {
         app->activity->vm->AttachCurrentThread(&jniEnv, NULL);
         assert(SwappyGL_init(jniEnv, app->activity->javaGameActivity));
         SwappyGL_setSwapIntervalNS(SWAPPY_SWAP_60FPS);
+
         ImGui::CreateContext();
+        ImGuiIO &io = ImGui::GetIO();
+
+        AAssetManager *mgr = app->activity->assetManager;
+        AAssetDir *assetDir = AAssetManager_openDir(mgr, "");
+        const char *filename = nullptr;
+        while ((filename = AAssetDir_getNextFileName(assetDir)) != nullptr) {
+            if (strcmp(filename, "RobotoMono-Light.ttf") == 0) {
+                AAsset *asset = AAssetManager_open(mgr, filename, AASSET_MODE_STREAMING);
+                size_t size = AAsset_getLength(asset);
+                char *data = new char[size];
+                memmove(data, AAsset_getBuffer(asset), size);
+                io.Fonts->AddFontFromMemoryTTF(data, size, 40);
+                AAsset_close(asset);
+            }
+        }
     }
 
     Game::~Game()
