@@ -8,7 +8,7 @@ namespace Solar {
     class Circle : public Object {
     public:
         Circle();
-        std::vector<Vertex> getVertices() const;
+        std::vector<Vector2> getVertices() const;
         std::vector<unsigned> getIndices() const;
         void getTransformation(float transform[9]) const;
 
@@ -16,8 +16,7 @@ namespace Solar {
         float radius = 1.0f;
         float distance = 0.0f;
         float angle = 0.0f;
-        Vector2 location = {};
-        Vector4 color = {};
+        Vector2 location;
 
     private:
         const int N = 100;

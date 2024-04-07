@@ -8,16 +8,16 @@ namespace Solar {
     class Path : public Object {
     public:
         Path(size_t capacity);
-        std::vector<Vertex> getVertices() const;
+        std::vector<Vector2> getVertices() const;
         std::vector<unsigned> getIndices() const;
         size_t getIndex() const;
         bool isFull() const;
-        void addPoint(Vertex point);
+        void addPoint(Vector2 point);
 
     private:
         size_t index = 0;
         bool full = false;
-        std::vector<Vertex> points;
+        std::vector<Vector2> points;
     };
 
 }

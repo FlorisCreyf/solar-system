@@ -8,8 +8,8 @@ namespace Solar {
     class ObjectShader : public Shader {
     public:
         ObjectShader();
-        void drawElements(const Buffer &buffer, Allocation alloc, const float transform[9]) const;
-        void drawLines(const Buffer &buffer, Allocation alloc, const float transform[9]) const;
+        void drawElements(const Buffer &buffer, Allocation alloc, Color color, const float transform[9]) const;
+        void drawLines(const Buffer &buffer, Allocation alloc, Color color, const float transform[9]) const;
     };
 
 }

@@ -4,17 +4,16 @@ namespace Solar {
 
     Ship::Ship()
     {
+        color = Color{1.0f, 1.0f, 1.0f};
     }
 
-    std::vector<Vertex> Ship::getVertices() const
+    std::vector<Vector2> Ship::getVertices() const
     {
-        float z = -0.9f;
-        std::vector<Vertex> vertices;
-        Vector4 color{1.0f, 1.0f, 1.0f, 1.0f};
-        vertices.push_back(Vertex(Vector4{0.03, -0.03f, z, 1.0f}, color)); // right
-        vertices.push_back(Vertex(Vector4{-0.03, -0.03f, z, 1.0f}, color)); // left
-        vertices.push_back(Vertex(Vector4{0.0f, 0.03f, z, 1.0f}, color)); // top
-        vertices.push_back(Vertex(Vector4{0.0f, -0.02f, z, 1.0f}, color)); // bottom
+        std::vector<Vector2> vertices;
+        vertices.push_back(Vector2{0.03, -0.03f}); // right
+        vertices.push_back(Vector2{-0.03, -0.03f}); // left
+        vertices.push_back(Vector2{0.0f, 0.03f}); // top
+        vertices.push_back(Vector2{0.0f, -0.02f}); // bottom
         return vertices;
     }
 
@@ -24,7 +23,6 @@ namespace Solar {
         indices.push_back(3);
         indices.push_back(2);
         indices.push_back(1);
-
         indices.push_back(3);
         indices.push_back(0);
         indices.push_back(2);

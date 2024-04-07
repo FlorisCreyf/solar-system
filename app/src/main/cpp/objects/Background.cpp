@@ -2,13 +2,12 @@
 
 namespace Solar {
 
-    std::vector<Vertex> Background::getVertices() const
+    std::vector<Vector2> Background::getVertices() const
     {
-        std::vector<Vertex> vertices;
-        Vector4 color{1.0f, 1.0f, 1.0f, 1.0f};
-        vertices.push_back(Vertex(Vector4{3.0f, -1.0f, 0.0f, 1.0f}, color));
-        vertices.push_back(Vertex(Vector4{-1.0f, 3.0f, 0.0f, 1.0f}, color));
-        vertices.push_back(Vertex(Vector4{-1.0f, -1.0f, 0.0f, 1.0f}, color));
+        std::vector<Vector2> vertices;
+        vertices.push_back(Vector2{3.0f, -1.0f});
+        vertices.push_back(Vector2{-1.0f, 3.0f});
+        vertices.push_back(Vector2{-1.0f, -1.0f});
         return vertices;
     }
 

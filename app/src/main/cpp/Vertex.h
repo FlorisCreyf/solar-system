@@ -35,26 +35,10 @@ namespace Solar {
         }
     };
 
-    struct Vector4 {
-        float x = 0.0f;
-        float y = 0.0f;
-        float z = 0.0f;
-        float w = 0.0f;
-    };
-
-    struct Vertex {
-        Vector4 position;
-        Vector4 color;
-
-        Vertex()
-        {
-        }
-
-        constexpr Vertex(const Vector4 &position, const Vector4 &color) :
-            position(position),
-            color(color)
-        {
-        }
+    struct Color {
+        float r = 0.0f;
+        float g = 0.0f;
+        float b = 0.0f;
     };
 
 }

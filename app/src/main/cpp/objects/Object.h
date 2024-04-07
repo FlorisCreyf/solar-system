@@ -15,7 +15,7 @@ namespace Solar {
 
     class Object {
     public:
-        virtual std::vector<Vertex> getVertices() const = 0;
+        virtual std::vector<Vector2> getVertices() const = 0;
         virtual std::vector<unsigned> getIndices() const = 0;
 
         virtual void getTransformation(float transform[9]) const
@@ -35,6 +35,8 @@ namespace Solar {
         {
             return alloc;
         }
+
+        Color color;
 
     private:
         Allocation alloc;

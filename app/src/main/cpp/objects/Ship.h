@@ -8,7 +8,7 @@ namespace Solar {
     class Ship : public Object {
     public:
         Ship();
-        std::vector<Vertex> getVertices() const;
+        std::vector<Vector2> getVertices() const;
         std::vector<unsigned> getIndices() const;
         void getTransformation(float transform[9]) const;
 

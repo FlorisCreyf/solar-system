@@ -4,9 +4,10 @@ namespace Solar {
 
     Path::Path(size_t capacity) : points(capacity*2)
     {
+        color = Color{1.0f, 1.0f, 1.0f};
     }
 
-    void Path::addPoint(Solar::Vertex point)
+    void Path::addPoint(Vector2 point)
     {
         points[index] = point;
         index = (index + 1) % points.size();
@@ -24,7 +25,7 @@ namespace Solar {
         return index;
     }
 
-    std::vector<Vertex> Path::getVertices() const
+    std::vector<Vector2> Path::getVertices() const
     {
         return points;
     }

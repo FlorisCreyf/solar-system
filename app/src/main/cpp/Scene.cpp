@@ -27,21 +27,19 @@ namespace Solar {
             buffer.add(ship);
             buffer.add(star);
             buffer.add(path);
-            objects.push_back(&ship);
-            objects.push_back(&star);
-
             float i = star.radius;
             for (auto &planet : planets) {
                 i += 1.0f;
                 planet.radius = 0.5f / i;
                 planet.distance = static_cast<float>(i);
                 planet.angle = static_cast<float>(i);
-                planet.color = Vector4{0.9f, 0.5f, 0.6f, 1.0f};
+                planet.color = Color{0.9f, 0.5f, 0.6f};
                 planet.mass = 0.4f;
                 objects.push_back(&planet);
                 buffer.add(planet);
             }
-
+            objects.push_back(&star);
+            objects.push_back(&ship);
             buffer.upload();
         }
     }
@@ -113,7 +111,7 @@ namespace Solar {
 
         ship.location = pos;
         location = pos;
-        path.addPoint(Vertex(Vector4{pos.x, pos.y, 0.0f, 0.0f}, Vector4{1.0f, 1.0f, 1.0f, 1.0f}));
+        path.addPoint(pos);
         buffer.update(path.getVertices(), path.getAllocation().vertexStart);
     }
 

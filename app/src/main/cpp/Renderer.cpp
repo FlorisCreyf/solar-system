@@ -29,7 +29,6 @@ namespace Solar {
         assert(eglMakeCurrent(display, surface, surface, context));
 
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        glEnable(GL_DEPTH_TEST);
         glDepthMask(GL_TRUE);
         glDepthFunc(GL_LEQUAL);
         glLineWidth(2);
@@ -102,7 +101,7 @@ namespace Solar {
         scene.getBuffer().bind();
 
         backgroundShader->activate();
-        const Background background = scene.getBackground();
+        Background background = scene.getBackground();
         Vector2 location = scene.getLocation();
         float x = location.x/2.0f * width;
         float y = location.y/2.0f * height;
@@ -117,9 +116,8 @@ namespace Solar {
         for (const Object *object : objects) {
             float transform[9];
             getTransform(transform, scene, object);
-            objectShader->drawElements(scene.getBuffer(), object->getAllocation(), transform);
+            objectShader->drawElements(scene.getBuffer(), object->getAllocation(), object->color, transform);
         }
-        glClear(GL_DEPTH_BUFFER_BIT);
         {
             Path path = scene.getPath();
             float transform[9];
@@ -127,17 +125,16 @@ namespace Solar {
             Allocation alloc;
             alloc = path.getAllocation();
             alloc.vertexCount = path.getIndex();
-            objectShader->drawLines(scene.getBuffer(), alloc, transform);
+            objectShader->drawLines(scene.getBuffer(), alloc, path.color, transform);
             if (path.isFull()) {
                 alloc = path.getAllocation();
                 alloc.vertexStart += path.getIndex();
                 alloc.vertexCount -= path.getIndex();
-                objectShader->drawLines(scene.getBuffer(), alloc, transform);
+                objectShader->drawLines(scene.getBuffer(), alloc, path.color, transform);
             }
         }
         scene.getBuffer().unbind();
 
-        glClear(GL_DEPTH_BUFFER_BIT);
         drawText(scene);
 
         if (SwappyGL_isEnabled())

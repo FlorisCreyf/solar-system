@@ -3,22 +3,21 @@
 
 namespace Solar {
 
-    Circle::Circle() : N(100), color{0.4f, 0.5f, 0.6f, 1.0f}
+    Circle::Circle() : N(100)
     {
+        color = Color{0.4f, 0.5f, 0.6f};
     }
 
-    std::vector<Vertex> Circle::getVertices() const
+    std::vector<Vector2> Circle::getVertices() const
     {
-        std::vector<Vertex> vertices;
+        std::vector<Vector2> vertices;
         float theta = 0.0f;
-        float z = -0.1f;
         float delta = 2.0f * M_PI / static_cast<float>(N);
-        vertices.push_back(Vertex(Vector4{0.0f, 0.0f, z, 1.0f}, color));
+        vertices.push_back(Vector2{0.0f, 0.0f});
         for (int i = 0; i < N; i++) {
             float x = std::cosf(theta) * radius;
             float y = std::sinf(theta) * radius;
-            Vector4 position{x, y, z, 1.0f};
-            vertices.push_back(Vertex(position, color));
+            vertices.push_back(Vector2{x, y});
             theta += delta;
         }
         return vertices;

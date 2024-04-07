@@ -7,7 +7,7 @@ namespace Solar {
 
     class Background : public Object {
     public:
-        std::vector<Vertex> getVertices() const;
+        std::vector<Vector2> getVertices() const;
         std::vector<unsigned> getIndices() const;
     };
 
