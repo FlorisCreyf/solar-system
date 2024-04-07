@@ -5,11 +5,9 @@
 
 namespace Solar {
 
-    union Vector2 {
-        struct {
-            float x, y;
-        };
-        float value[2];
+    struct Vector2 {
+        float x = 0.0f;
+        float y = 0.0f;
 
         Vector2 operator*(float b)
         {
@@ -37,19 +35,20 @@ namespace Solar {
         }
     };
 
-    union Vector4 {
-        struct {
-            float x, y, z, w;
-        };
-        struct {
-            float r, g, b, a;
-        };
-        float value[4];
+    struct Vector4 {
+        float x = 0.0f;
+        float y = 0.0f;
+        float z = 0.0f;
+        float w = 0.0f;
     };
 
     struct Vertex {
         Vector4 position;
         Vector4 color;
+
+        Vertex()
+        {
+        }
 
         constexpr Vertex(const Vector4 &position, const Vector4 &color) :
             position(position),

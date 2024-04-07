@@ -2,7 +2,7 @@
 #define SHADER_H
 
 #include "../Buffer.h"
-#include "../Object.h"
+#include "../objects/Object.h"
 #include <GLES3/gl3.h>
 #include <string>
 

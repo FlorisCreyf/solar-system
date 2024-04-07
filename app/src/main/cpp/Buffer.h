@@ -1,7 +1,7 @@
 #ifndef MODEL_H
 #define MODEL_H
 
-#include "Object.h"
+#include "objects/Object.h"
 #include <GLES3/gl3.h>
 #include <vector>
 
@@ -13,6 +13,7 @@ namespace Solar {
         ~Buffer();
         void add(Object &object);
         void upload();
+        void update(std::vector<Vertex> vertices, size_t index);
         void clear();
         void bind() const;
         void unbind() const;

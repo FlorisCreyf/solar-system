@@ -6,7 +6,7 @@
 
 namespace Solar {
 
-    Scene::Scene()
+    Scene::Scene() : path(100)
     {
         star.mass = 5.0f;
         star.radius = 1.0f;
@@ -26,6 +26,7 @@ namespace Solar {
             buffer.add(background);
             buffer.add(ship);
             buffer.add(star);
+            buffer.add(path);
             objects.push_back(&ship);
             objects.push_back(&star);
 
@@ -112,6 +113,8 @@ namespace Solar {
 
         ship.location = pos;
         location = pos;
+        path.addPoint(Vertex(Vector4{pos.x, pos.y, 0.0f, 0.0f}, Vector4{1.0f, 1.0f, 1.0f, 1.0f}));
+        buffer.update(path.getVertices(), path.getAllocation().vertexStart);
     }
 
     Vector2 Scene::getLocation() const
@@ -127,6 +130,11 @@ namespace Solar {
     const Ship Scene::getShip() const
     {
         return ship;
+    }
+
+    const Path Scene::getPath() const
+    {
+        return path;
     }
 
     const Background Scene::getBackground() const

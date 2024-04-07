@@ -51,6 +51,14 @@ namespace Solar {
         glBindVertexArray(0);
     }
 
+    void Buffer::update(std::vector<Vertex> data, size_t index)
+    {
+        glBindBuffer(GL_ARRAY_BUFFER, this->buffers[0]);
+        size_t offset = index * sizeof(Vertex);
+        size_t size = data.size() * sizeof(Vertex);
+        glBufferSubData(GL_ARRAY_BUFFER, offset, size, data.data());
+    }
+
     void Buffer::clear()
     {
         deleteVAO();

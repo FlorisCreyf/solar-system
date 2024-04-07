@@ -3,10 +3,11 @@
 
 #include "Ray.h"
 #include "Buffer.h"
-#include "Background.h"
-#include "Object.h"
-#include "Ship.h"
-#include "Circle.h"
+#include "objects/Background.h"
+#include "objects/Object.h"
+#include "objects/Ship.h"
+#include "objects/Circle.h"
+#include "objects/Path.h"
 #include <chrono>
 
 namespace Solar {
@@ -24,11 +25,13 @@ namespace Solar {
         const Buffer &getBuffer() const;
         std::vector<const Object *> getObjects() const;
         const Ship getShip() const;
+        const Path getPath() const;
         const Background getBackground() const;
 
     private:
         Buffer buffer;
         Ship ship;
+        Path path;
         Circle star;
         Background background;
         std::vector<Circle> planets;

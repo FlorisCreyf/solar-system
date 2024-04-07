@@ -1,3 +1,4 @@
+#include "../AndroidOut.h"
 #include "ObjectShader.h"
 
 static const char *vertex = R"vertex(#version 300 es
@@ -27,12 +28,22 @@ namespace Solar {
     {
     }
 
-    void ObjectShader::draw(const Buffer &buffer, Allocation alloc, const float transform[9]) const
+    void ObjectShader::drawElements(const Buffer &buffer, Allocation alloc,
+                                    const float transform[9]) const
     {
         GLuint u = glGetUniformLocation(getProgram(), "transform");
         glUniformMatrix3fv(u, 1, false, transform);
         GLvoid *start = (GLvoid *)(alloc.indexStart * sizeof(unsigned));
         glDrawElements(GL_TRIANGLES, alloc.indexCount, GL_UNSIGNED_INT, start);
+    }
+
+    void ObjectShader::drawLines(const Solar::Buffer &buffer, Solar::Allocation alloc,
+                                 const float *transform) const
+    {
+        GLuint u = glGetUniformLocation(getProgram(), "transform");
+        glUniformMatrix3fv(u, 1, false, transform);
+        GLvoid *start = (GLvoid *)(alloc.vertexStart * sizeof(Vertex));
+        glDrawArrays(GL_LINES, alloc.vertexStart, alloc.vertexCount);
     }
 
 }

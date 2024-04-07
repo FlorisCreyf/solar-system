@@ -30,9 +30,10 @@ add_library(solarsystem SHARED
         shaders/Shader.cpp
         shaders/ObjectShader.cpp
         shaders/BackgroundShader.cpp
-        Ship.cpp
-        Circle.cpp
-        Background.cpp
+        objects/Ship.cpp
+        objects/Circle.cpp
+        objects/Background.cpp
+        objects/Path.cpp
 )
 target_include_directories(solarsystem PRIVATE
         ${IMGUI_DIR}

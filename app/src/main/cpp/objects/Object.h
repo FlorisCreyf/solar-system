@@ -1,7 +1,7 @@
 #ifndef SOLARSYSTEM_OBJECT_H
 #define SOLARSYSTEM_OBJECT_H
 
-#include "Vertex.h"
+#include "../Vertex.h"
 #include <vector>
 
 namespace Solar {
@@ -38,11 +38,6 @@ namespace Solar {
 
     private:
         Allocation alloc;
-        float transform[9] = {
-                1, 0, 0,
-                0, 1, 0,
-                0, 0, 1
-        };
 
         friend class Buffer;
     };
