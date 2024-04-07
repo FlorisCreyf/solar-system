@@ -33,6 +33,13 @@ namespace Solar {
         {
             return std::sqrt(x*x + y*y);
         }
+
+        void normalize()
+        {
+            float m = magnitude();
+            x /= m;
+            y /= m;
+        }
     };
 
     struct Color {

@@ -10,7 +10,7 @@ namespace Solar {
     Game::Game(android_app *app) :
         app(app),
         renderer(nullptr),
-        scene(),
+        scene(nullptr),
         jniEnv(nullptr)
     {
         app->activity->vm->AttachCurrentThread(&jniEnv, NULL);
@@ -37,6 +37,8 @@ namespace Solar {
 
     Game::~Game()
     {
+        if (scene)
+            delete scene;
         ImGui::DestroyContext();
         SwappyGL_destroy();
         app->activity->vm->AttachCurrentThread(&jniEnv, NULL);
@@ -49,14 +51,17 @@ namespace Solar {
         if (!renderer) {
             assert(SwappyGL_setWindow(app->window));
             renderer = new Renderer(app);
-            scene.load();
+            if (!scene)
+                scene = new Scene(1.0f/std::min(renderer->getWidth(), renderer->getHeight()));
+            scene->load();
         }
         currentTime = std::chrono::high_resolution_clock::now();
     }
 
     void Game::release()
     {
-        scene.unload();
+        if (scene)
+            scene->unload();
         if (renderer) {
             delete renderer;
             renderer = nullptr;
@@ -78,18 +83,18 @@ namespace Solar {
         }
 
         processInput();
-        renderer->render(scene);
+        renderer->render(*scene);
     }
 
     void Game::update(std::chrono::duration<double> duration)
     {
-        scene.update(duration.count());
+        scene->update(duration.count());
     }
 
     void Game::processInput()
     {
         auto *inputBuffer = android_app_swap_input_buffers(app);
-        if (!inputBuffer)
+        if (!inputBuffer || !renderer)
             return;
 
         for (auto i = 0; i < inputBuffer->motionEventsCount; i++) {
@@ -103,13 +108,13 @@ namespace Solar {
                 case AMOTION_EVENT_ACTION_DOWN:
                 case AMOTION_EVENT_ACTION_POINTER_DOWN:
                     if (pointerIndex == 0) {
-                        originalLocation = scene.getLocation();
+                        originalLocation = scene->getLocation();
                         originalPointLocation = Vector2{x, y};
                     }
                     break;
                 case AMOTION_EVENT_ACTION_UP:
                 case AMOTION_EVENT_ACTION_POINTER_UP:
-                    scene.update(Ray{Vector2{}, Vector2{}});
+                    scene->update(Ray{Vector2{}, Vector2{}});
                     break;
                 case AMOTION_EVENT_ACTION_MOVE:
                     if (pointerIndex == 0) {
@@ -127,8 +132,7 @@ namespace Solar {
                             originalLocation.x + x2 - x1,
                             originalLocation.y + y2 - y1
                         };
-                        scene.update(Ray{originalLocation, location});
-//                        scene.update(location);
+                        scene->update(Ray{originalLocation, location});
                     }
                     break;
             }

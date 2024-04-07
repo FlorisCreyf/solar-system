@@ -36,7 +36,6 @@ namespace Solar {
 
         glBindBuffer(GL_ARRAY_BUFFER, buffers[0]);
         glBufferData(GL_ARRAY_BUFFER, vertices.size()*sizeof(Vector2), vertices.data(), GL_STATIC_DRAW);
-
         GLsizei stride = sizeof(Vector2);
         glVertexAttribPointer(0, 2, GL_FLOAT, false, stride, nullptr);
         glEnableVertexAttribArray(0);
@@ -45,14 +44,24 @@ namespace Solar {
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size()*sizeof(unsigned), indices.data(), GL_STATIC_DRAW);
 
         glBindVertexArray(0);
+        vertices.clear();
+        indices.clear();
     }
 
-    void Buffer::update(std::vector<Vector2> data, size_t index)
+    void Buffer::update(const Vector2 *data, size_t offset, size_t size)
     {
-        glBindBuffer(GL_ARRAY_BUFFER, this->buffers[0]);
-        size_t offset = index * sizeof(Vector2);
-        size_t size = data.size() * sizeof(Vector2);
-        glBufferSubData(GL_ARRAY_BUFFER, offset, size, data.data());
+        glBindBuffer(GL_ARRAY_BUFFER, buffers[0]);
+        offset *= sizeof(Vector2);
+        size *= sizeof(Vector2);
+        glBufferSubData(GL_ARRAY_BUFFER, offset, size, data);
+    }
+
+    void Buffer::update(const unsigned *data, size_t offset, size_t size)
+    {
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers[1]);
+        offset *= sizeof(unsigned);
+        size *= sizeof(unsigned);
+        glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, offset, size, data);
     }
 
     void Buffer::clear()

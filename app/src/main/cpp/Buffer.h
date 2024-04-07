@@ -13,7 +13,8 @@ namespace Solar {
         ~Buffer();
         void add(Object &object);
         void upload();
-        void update(std::vector<Vector2> vertices, size_t index);
+        void update(const Vector2 *data, size_t offset, size_t size);
+        void update(const unsigned *data, size_t offset, size_t size);
         void clear();
         void bind() const;
         void unbind() const;
@@ -23,7 +24,6 @@ namespace Solar {
 
         GLuint vao;
         GLuint buffers[2];
-
         std::vector<Vector2> vertices;
         std::vector<unsigned> indices;
     };

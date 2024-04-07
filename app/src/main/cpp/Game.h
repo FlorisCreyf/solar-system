@@ -25,7 +25,7 @@ namespace Solar {
         JNIEnv *jniEnv;
         android_app *app;
         Renderer *renderer;
-        Scene scene;
+        Scene *scene;
         Vector2 originalLocation;
         Vector2 originalPointLocation;
         std::chrono::high_resolution_clock::time_point currentTime;

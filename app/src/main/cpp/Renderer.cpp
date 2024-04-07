@@ -29,9 +29,6 @@ namespace Solar {
         assert(eglMakeCurrent(display, surface, surface, context));
 
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        glDepthMask(GL_TRUE);
-        glDepthFunc(GL_LEQUAL);
-        glLineWidth(2);
         assert(glGetError() == GL_NO_ERROR);
 
         assert(eglQuerySurface(display, surface, EGL_WIDTH, &width) == EGL_TRUE);
@@ -116,22 +113,7 @@ namespace Solar {
         for (const Object *object : objects) {
             float transform[9];
             getTransform(transform, scene, object);
-            objectShader->drawElements(scene.getBuffer(), object->getAllocation(), object->color, transform);
-        }
-        {
-            Path path = scene.getPath();
-            float transform[9];
-            getTransform(transform, scene, &path);
-            Allocation alloc;
-            alloc = path.getAllocation();
-            alloc.vertexCount = path.getIndex();
-            objectShader->drawLines(scene.getBuffer(), alloc, path.color, transform);
-            if (path.isFull()) {
-                alloc = path.getAllocation();
-                alloc.vertexStart += path.getIndex();
-                alloc.vertexCount -= path.getIndex();
-                objectShader->drawLines(scene.getBuffer(), alloc, path.color, transform);
-            }
+            objectShader->draw(scene.getBuffer(), object->getAllocation(), object->color, transform);
         }
         scene.getBuffer().unbind();
 

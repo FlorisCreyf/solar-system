@@ -6,7 +6,9 @@
 
 namespace Solar {
 
-    Scene::Scene() : path(100)
+    Scene::Scene(float pixelDensity) :
+        path(1000, Vector2{}, pixelDensity*4.0f),
+        pixelDensity(pixelDensity)
     {
         star.mass = 5.0f;
         star.radius = 1.0f;
@@ -39,6 +41,7 @@ namespace Solar {
                 buffer.add(planet);
             }
             objects.push_back(&star);
+            objects.push_back(&path);
             objects.push_back(&ship);
             buffer.upload();
         }
@@ -106,13 +109,22 @@ namespace Solar {
         ship.acceleration.y = force.y / ship.mass;
         ship.velocity.x += ship.acceleration.x * duration;
         ship.velocity.y += ship.acceleration.y * duration;
-        pos.x += ship.velocity.x*duration;
-        pos.y += ship.velocity.y*duration;
+        pos.x += ship.velocity.x * duration;
+        pos.y += ship.velocity.y * duration;
 
         ship.location = pos;
         location = pos;
-        path.addPoint(pos);
-        buffer.update(path.getVertices(), path.getAllocation().vertexStart);
+        if ((path.getLastPoint() - pos).magnitude() > pixelDensity*20.0f) {
+            Allocation alloc = path.addPoint(pos);
+            if (alloc.indexCount) {
+                const size_t vs = path.getAllocation().vertexStart;
+                const size_t is = path.getAllocation().indexStart;
+                const Vector2 *vb = &path.getVerticesRef().data()[alloc.vertexStart];
+                const unsigned *ib = &path.getIndicesRef().data()[alloc.indexStart];
+                buffer.update(vb, alloc.vertexStart+vs, alloc.vertexCount);
+                buffer.update(ib, alloc.indexStart+is, alloc.indexCount);
+            }
+        }
     }
 
     Vector2 Scene::getLocation() const
@@ -128,11 +140,6 @@ namespace Solar {
     const Ship Scene::getShip() const
     {
         return ship;
-    }
-
-    const Path Scene::getPath() const
-    {
-        return path;
     }
 
     const Background Scene::getBackground() const
