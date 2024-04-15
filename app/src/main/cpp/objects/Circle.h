@@ -2,12 +2,13 @@
 #define SOLARSYSTEM_CIRCLE_H
 
 #include "Object.h"
+#include <string>
 
 namespace Solar {
 
     class Circle : public Object {
     public:
-        Circle();
+        Circle(std::string name);
         std::vector<Vector2> getVertices() const;
         std::vector<unsigned> getIndices() const;
         void getTransformation(float transform[9]) const;
@@ -17,6 +18,8 @@ namespace Solar {
         float distance = 0.0f;
         float angle = 0.0f;
         Vector2 location;
+        Vector2 velocity;
+        const std::string name;
 
     private:
         const int N = 100;

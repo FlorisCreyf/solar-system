@@ -163,7 +163,22 @@ namespace Solar {
         ImGui::Begin("coords", nullptr, windowFlags);
         ImGui::Text("Position: (%.3f %.3f)", scene.getLocation().x, scene.getLocation().y);
         Vector2 velocity = scene.getShip().velocity;
-        ImGui::Text("Velocity: %.3f", sqrt(velocity.x*velocity.x + velocity.y*velocity.y));
+        Vector2 acceleration = scene.getShip().acceleration;
+        ImGui::Text("Velocity: %.3f", velocity.magnitude());
+        ImGui::Text("Acceleration: %.3f", acceleration.magnitude());
+        if (scene.getCollidedObject()) {
+            objectName = scene.getCollidedObject()->name;
+            currentTime = std::chrono::high_resolution_clock::now();
+        } else {
+            auto now = std::chrono::high_resolution_clock::now();
+            auto past = currentTime;
+            auto duration = std::chrono::duration_cast<std::chrono::duration<double>>(now - past);
+            if (duration.count() > 0.5F) {
+                currentTime = now;
+                objectName = "";
+            }
+        }
+        ImGui::Text("Collision: %s", objectName.data());
         ImGui::End();
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

@@ -3,7 +3,7 @@
 
 namespace Solar {
 
-    Circle::Circle() : N(100)
+    Circle::Circle(std::string name) : N(100), name(name)
     {
         color = Color{0.4f, 0.5f, 0.6f};
     }

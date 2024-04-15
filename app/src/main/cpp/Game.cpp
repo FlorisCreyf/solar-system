@@ -77,7 +77,7 @@ namespace Solar {
         auto past = currentTime;
         auto duration = std::chrono::duration_cast<std::chrono::duration<double>>(now - past);
 
-        if (duration.count() > 1.f/120.f) {
+        if (duration.count() > 1.f/60.f) {
             currentTime = now;
             update(duration);
         }

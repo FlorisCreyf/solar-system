@@ -21,8 +21,7 @@ namespace Solar {
     {
         Allocation a;
         if (index % 2 == 1) {
-            Vector2 d = point - lastPoint;
-            d.normalize();
+            Vector2 d = (point - lastPoint).normalize();
             Vector2 n1{-d.y*width, d.x*width};
             Vector2 n2{d.y*width, -d.x*width};
             size_t vi = (index-1)*2;
@@ -33,13 +32,12 @@ namespace Solar {
             vertices[vi+2] = point + n2;
             vertices[vi+3] = point + n1;
 
-            const size_t vs = getAllocation().vertexStart;
-            indices[ii+0] = vs+vi+0;
-            indices[ii+1] = vs+vi+1;
-            indices[ii+2] = vs+vi+2;
-            indices[ii+3] = vs+vi+2;
-            indices[ii+4] = vs+vi+3;
-            indices[ii+5] = vs+vi+0;
+            indices[ii+0] = vi+0;
+            indices[ii+1] = vi+1;
+            indices[ii+2] = vi+2;
+            indices[ii+3] = vi+2;
+            indices[ii+4] = vi+3;
+            indices[ii+5] = vi+0;
 
             a.vertexStart = vi;
             a.indexStart = ii;

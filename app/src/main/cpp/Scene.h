@@ -14,7 +14,7 @@ namespace Solar {
 
     class Scene {
     public:
-        Scene(float pixelDensity);
+        Scene(float pixelSize);
         ~Scene();
         void load();
         void unload();
@@ -25,18 +25,22 @@ namespace Solar {
         const Buffer &getBuffer() const;
         std::vector<const Object *> getObjects() const;
         const Ship getShip() const;
+        const Circle *getCollidedObject() const;
         const Background getBackground() const;
 
     private:
+        void updatePath();
+
         Buffer buffer;
         Ship ship;
         Path path;
-        Circle star;
+        Circle planet;
         Background background;
-        std::vector<Circle> planets;
+        std::vector<Circle> moons;
         std::vector<const Object *> objects;
-        Vector2 location;
-        const float pixelDensity;
+        Circle *collidedObject;
+        const float pixelSize;
+        bool uploaded;
     };
 
 }

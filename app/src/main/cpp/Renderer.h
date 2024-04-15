@@ -30,6 +30,8 @@ namespace Solar {
         EGLint height;
         ObjectShader *objectShader;
         BackgroundShader *backgroundShader;
+        std::chrono::high_resolution_clock::time_point currentTime;
+        std::string objectName;
 
         EGLConfig getConfig();
         void getTransform(float transform[9], const Scene &scene, const Object *object);

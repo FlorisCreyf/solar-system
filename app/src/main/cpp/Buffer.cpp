@@ -56,12 +56,21 @@ namespace Solar {
         glBufferSubData(GL_ARRAY_BUFFER, offset, size, data);
     }
 
-    void Buffer::update(const unsigned *data, size_t offset, size_t size)
+    void Buffer::update(const unsigned *data, size_t offset, size_t size, size_t indexOffset)
     {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers[1]);
-        offset *= sizeof(unsigned);
-        size *= sizeof(unsigned);
-        glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, offset, size, data);
+        if (indexOffset != 0) {
+            std::vector<unsigned> is(size);
+            for (size_t i = 0; i < size; i++)
+                is[i] = data[i] + indexOffset;
+            offset *= sizeof(unsigned);
+            size *= sizeof(unsigned);
+            glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, offset, size, is.data());
+        } else {
+            offset *= sizeof(unsigned);
+            size *= sizeof(unsigned);
+            glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, offset, size, data);
+        }
     }
 
     void Buffer::clear()

@@ -11,6 +11,7 @@ namespace Solar {
         std::vector<Vector2> getVertices() const;
         std::vector<unsigned> getIndices() const;
         void getTransformation(float transform[9]) const;
+        void getCorners(Vector2 &top, Vector2 &bottomRight, Vector2 &bottomLeft) const;
 
         float mass = 1.0f;
         Vector2 force = {0.0f, 0.0f};

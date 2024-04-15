@@ -40,4 +40,18 @@ namespace Solar {
         t[7] = location.y;
     }
 
+    void Ship::getCorners(Vector2 &top, Vector2 &bottomRight, Vector2 &bottomLeft) const
+    {
+        float d = 0.03f;
+        float sn = std::sin(angle) * 0.03f;
+        float cn = std::cos(angle) * 0.03f;
+        top = Vector2{sn, cn} + location;
+        bottomRight = Vector2{cn-sn, -cn-sn} + location;
+        bottomLeft = Vector2{-cn-sn, -cn+sn} + location;
+        // Without rotation:
+        // top = Vector2{0.0f, d} + location;
+        // bottomRight = Vector2{d, -d} + location;
+        // bottomLeft = Vector2{-d, -d} + location;
+    }
+
 }

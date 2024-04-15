@@ -14,7 +14,7 @@ namespace Solar {
         void add(Object &object);
         void upload();
         void update(const Vector2 *data, size_t offset, size_t size);
-        void update(const unsigned *data, size_t offset, size_t size);
+        void update(const unsigned *data, size_t offset, size_t size, size_t indexOffset=0);
         void clear();
         void bind() const;
         void unbind() const;

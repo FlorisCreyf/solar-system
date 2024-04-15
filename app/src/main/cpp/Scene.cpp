@@ -6,16 +6,35 @@
 
 namespace Solar {
 
-    Scene::Scene(float pixelDensity) :
-        path(1000, Vector2{}, pixelDensity*4.0f),
-        pixelDensity(pixelDensity)
+    Scene::Scene(float pixelSize) :
+        planet("Planet"),
+        path(1000, Vector2{0.0f, 1.5f}, pixelSize*4.0f),
+        collidedObject(nullptr),
+        pixelSize(pixelSize),
+        uploaded(false)
     {
-        star.mass = 5.0f;
-        star.radius = 1.0f;
+        planet.mass = 5.0f;
+        planet.radius = 1.0f;
         ship.mass = 1.0f;
-        ship.location.x = location.x = 0.0f;
-        ship.location.y = location.y = 0.0f;
-        planets.resize(5);
+        ship.location = {0.0f, 1.5f};
+        ship.velocity = {0.0f, 0.1f};
+        float r = planet.radius;
+        for (size_t i = 1; i < 5; i++) {
+            Circle moon("Moon-" + std::to_string(i));
+            r += 1.0f;
+            moon.radius = 0.5f / r;
+            moon.distance = static_cast<float>(r) + moon.radius;
+            moon.angle = static_cast<float>(r);
+            moon.color = Color{0.9f, 0.5f, 0.6f};
+            moon.mass = M_PI * moon.radius * moon.radius;
+            moon.location = {0.0f, moon.distance};
+            moons.push_back(moon);
+        }
+        for (auto &moon : moons)
+            objects.push_back(&moon);
+        objects.push_back(&planet);
+        objects.push_back(&path);
+        objects.push_back(&ship);
     }
 
     Scene::~Scene()
@@ -24,38 +43,26 @@ namespace Solar {
 
     void Scene::load()
     {
-        if (objects.empty()) {
+        if (!uploaded) {
+            buffer.add(path);
             buffer.add(background);
             buffer.add(ship);
-            buffer.add(star);
-            buffer.add(path);
-            float i = star.radius;
-            for (auto &planet : planets) {
-                i += 1.0f;
-                planet.radius = 0.5f / i;
-                planet.distance = static_cast<float>(i);
-                planet.angle = static_cast<float>(i);
-                planet.color = Color{0.9f, 0.5f, 0.6f};
-                planet.mass = 0.4f;
-                objects.push_back(&planet);
-                buffer.add(planet);
-            }
-            objects.push_back(&star);
-            objects.push_back(&path);
-            objects.push_back(&ship);
+            buffer.add(planet);
+            for (auto &moon : moons)
+                buffer.add(moon);
             buffer.upload();
         }
     }
 
     void Scene::unload()
     {
-        objects.clear();
         buffer.clear();
+        uploaded = false;
     }
 
     void Scene::update(Vector2 loc)
     {
-        location = loc;
+        ship.location = loc;
     }
 
     void Scene::update(Ray ray)
@@ -69,6 +76,62 @@ namespace Solar {
             if (v.y < 0.0f)
                 ship.angle = ship.angle + M_PI;
         }
+    }
+
+    void movePoint(Vector2 p, Ship &ship, Circle circle)
+    {
+        Vector2 u = p - circle.location;
+        if (ship.velocity.magnitude() > 0.0f) {
+            Vector2 v = ship.velocity.normalize();
+            float b = dot(u, v);
+            float u_norm = u.magnitude();
+            float t1 = u_norm * u_norm - b * b;
+            float a = std::sqrt(std::abs(t1));
+            float t2 = circle.radius * circle.radius - a * a;
+            float l = std::sqrt(std::abs(t2));
+            if (b < 0.0f)
+                ship.location -= v * (b + l);
+            else
+                ship.location += v * (l - b);
+        }
+
+        Vector2 normal = (ship.location - circle.location).normalize();
+        Vector2 d = normal * dot(ship.velocity-circle.velocity, normal);
+        ship.velocity -= d * 2.0f;
+
+        if ((ship.velocity - circle.velocity).magnitude() < 1.0f)
+            ship.velocity = circle.velocity;
+        else
+            ship.velocity = ship.velocity + ((circle.velocity - ship.velocity) * 0.1f);
+    }
+
+    bool checkCollision(Vector2 p, Ship &ship, Circle circle)
+    {
+        Vector2 u = p - circle.location;
+        float r = u.magnitude();
+        if (r <= circle.radius) {
+            movePoint(p, ship, circle);
+            return true;
+        }
+        return false;
+    }
+
+    bool collide(Ship &ship, Circle circle)
+    {
+        return checkCollision(ship.location, ship, circle);
+        // Vector2 top;
+        // Vector2 bottomRight;
+        // Vector2 bottomLeft;
+        // bool collision;
+        // ship.getCorners(top, bottomRight, bottomLeft);
+        // collision = collidePoint(top, ship, circle);
+        // if (collision)
+        //     ship.getCorners(top, bottomRight, bottomLeft);
+        // collision = collision || collidePoint(bottomRight, ship, circle);
+        // if (collision)
+        //     ship.getCorners(top, bottomRight, bottomLeft);
+        // collision = collision || collidePoint(bottomLeft, ship, circle);
+        // return collision;
     }
 
     void addForce(Vector2 &force, Vector2 p1, Vector2 p2, float m1, float m2, float radius)
@@ -92,30 +155,49 @@ namespace Solar {
 
     void Scene::update(double duration)
     {
-        float i = 0.0f;
         Vector2 force = ship.force;
-        Vector2 pos = ship.location;
 
-        for (auto &planet : planets) {
-            i += 1.0f;
-            planet.angle += duration;
-            planet.location.x = std::cos(planet.angle/i) * planet.distance;
-            planet.location.y = std::sin(planet.angle/i) * planet.distance;
-            addForce(force, ship.location, planet.location, ship.mass, planet.mass, planet.radius);
+        addForce(force, ship.location, planet.location, ship.mass, planet.mass, planet.radius);
+        planet.location += planet.velocity * duration;
+
+        for (auto &moon : moons) {
+            moon.angle += duration;
+            float m = 1.0f / moon.distance;
+            float n = moon.distance - moon.radius;
+            moon.velocity = {
+                std::cos((moon.angle-n)*m),
+                -std::sin((moon.angle-n)*m)
+            };
+            addForce(force, ship.location, moon.location, ship.mass, moon.mass, moon.radius);
+            moon.location += moon.velocity * duration;
         }
 
-        addForce(force, ship.location, star.location, ship.mass, star.mass, star.radius);
-        ship.acceleration.x = force.x / ship.mass;
-        ship.acceleration.y = force.y / ship.mass;
-        ship.velocity.x += ship.acceleration.x * duration;
-        ship.velocity.y += ship.acceleration.y * duration;
-        pos.x += ship.velocity.x * duration;
-        pos.y += ship.velocity.y * duration;
+        if (collidedObject) {
+            Vector2 n = (ship.location - collidedObject->location).normalize();
+            force -= n * dot(n, force);
+        }
 
-        ship.location = pos;
-        location = pos;
-        if ((path.getLastPoint() - pos).magnitude() > pixelDensity*20.0f) {
-            Allocation alloc = path.addPoint(pos);
+        ship.acceleration = force / ship.mass;
+        ship.velocity += ship.acceleration * duration;
+        ship.location += ship.velocity * duration;
+
+        if (!collide(ship, planet)) {
+            collidedObject = nullptr;
+            for (auto &moon: moons)
+                if (collide(ship, moon)) {
+                    collidedObject = &moon;
+                    break;
+                }
+        } else
+            collidedObject = &planet;
+
+        updatePath();
+    }
+
+    void Scene::updatePath()
+    {
+        if ((path.getLastPoint() - ship.location).magnitude() > pixelSize * 20.0f) {
+            Allocation alloc = path.addPoint(ship.location);
             if (alloc.indexCount) {
                 const size_t vs = path.getAllocation().vertexStart;
                 const size_t is = path.getAllocation().indexStart;
@@ -129,7 +211,7 @@ namespace Solar {
 
     Vector2 Scene::getLocation() const
     {
-        return location;
+        return ship.location;
     }
 
     std::vector<const Object *> Scene::getObjects() const
@@ -140,6 +222,11 @@ namespace Solar {
     const Ship Scene::getShip() const
     {
         return ship;
+    }
+
+    const Circle *Scene::getCollidedObject() const
+    {
+        return collidedObject;
     }
 
     const Background Scene::getBackground() const
