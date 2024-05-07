@@ -16,6 +16,8 @@ namespace Solar {
         Vector2 getLastPoint() const;
 
     private:
+        void addLine(Vector2 p0, Vector2 p1, size_t vi, size_t ii);
+
         float width;
         size_t index = 0;
         size_t capacity;

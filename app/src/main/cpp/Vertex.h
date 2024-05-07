@@ -10,7 +10,7 @@ namespace Solar {
         float x = 0.0f;
         float y = 0.0f;
 
-        Vector2 operator*(float b)
+        Vector2 operator*(float b) const
         {
             return Vector2{x * b, y * b};
         }
@@ -22,7 +22,7 @@ namespace Solar {
             return *this;
         }
 
-        Vector2 operator/(float b)
+        Vector2 operator/(float b) const
         {
             return Vector2{x / b, y / b};
         }
@@ -34,24 +34,24 @@ namespace Solar {
             return *this;
         }
 
-        Vector2 operator+(const Vector2 &b)
+        Vector2 operator+(Vector2 b) const
         {
             return Vector2{x + b.x, y + b.y};
         }
 
-        Vector2 &operator+=(const Vector2 &b)
+        Vector2 &operator+=(Vector2 b)
         {
             x += b.x;
             y += b.y;
             return *this;
         }
 
-        Vector2 operator-(const Vector2 &b)
+        Vector2 operator-(Vector2 b)
         {
             return Vector2{x - b.x, y - b.y};
         }
 
-        Vector2 &operator-=(const Vector2 &b)
+        Vector2 &operator-=(Vector2 b)
         {
             x -= b.x;
             y -= b.y;

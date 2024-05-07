@@ -15,7 +15,6 @@ namespace Solar {
     class Scene {
     public:
         Scene(float pixelSize);
-        ~Scene();
         void load();
         void unload();
         void update(Vector2 location);
@@ -30,6 +29,8 @@ namespace Solar {
 
     private:
         void updatePath();
+        bool collide(Vector2 p, Circle &circle, float duration);
+        void movePoint(Vector2 p, Circle circle, float duration);
 
         Buffer buffer;
         Ship ship;

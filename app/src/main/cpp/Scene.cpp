@@ -8,15 +8,16 @@ namespace Solar {
 
     Scene::Scene(float pixelSize) :
         planet("Planet"),
-        path(1000, Vector2{0.0f, 1.5f}, pixelSize*4.0f),
+        path(1000, Vector2{0.0f, 3.5f}, pixelSize*4.0f),
         collidedObject(nullptr),
         pixelSize(pixelSize),
         uploaded(false)
     {
         planet.mass = 5.0f;
         planet.radius = 1.0f;
+        planet.velocity = {0.0f, 0.1f};
         ship.mass = 1.0f;
-        ship.location = {0.0f, 1.5f};
+        ship.location = {0.0f, 3.5f};
         ship.velocity = {0.0f, 0.1f};
         float r = planet.radius;
         for (size_t i = 1; i < 5; i++) {
@@ -35,10 +36,6 @@ namespace Solar {
         objects.push_back(&planet);
         objects.push_back(&path);
         objects.push_back(&ship);
-    }
-
-    Scene::~Scene()
-    {
     }
 
     void Scene::load()
@@ -78,10 +75,12 @@ namespace Solar {
         }
     }
 
-    void movePoint(Vector2 p, Ship &ship, Circle circle)
+    /* TODO: What happens if the ship passed all the way through the circle? */
+    void Scene::movePoint(Vector2 p, Circle circle, float duration)
     {
         Vector2 u = p - circle.location;
         if (ship.velocity.magnitude() > 0.0f) {
+            // Move ship to surface along velocity vector
             Vector2 v = ship.velocity.normalize();
             float b = dot(u, v);
             float u_norm = u.magnitude();
@@ -93,45 +92,29 @@ namespace Solar {
                 ship.location -= v * (b + l);
             else
                 ship.location += v * (l - b);
+
+            // Project velocity vector onto surface tangent
+            Vector2 normal = (ship.location - circle.location).normalize();
+            float angle = std::atan2(normal.y, normal.x);
+            Vector2 tangent{-std::sin(angle), std::cos(angle)};
+            ship.velocity = tangent * dot(ship.velocity, tangent);
+            ship.location += ship.velocity * duration;
         }
-
-        Vector2 normal = (ship.location - circle.location).normalize();
-        Vector2 d = normal * dot(ship.velocity-circle.velocity, normal);
-        ship.velocity -= d * 2.0f;
-
-        if ((ship.velocity - circle.velocity).magnitude() < 1.0f)
-            ship.velocity = circle.velocity;
-        else
-            ship.velocity = ship.velocity + ((circle.velocity - ship.velocity) * 0.1f);
     }
 
-    bool checkCollision(Vector2 p, Ship &ship, Circle circle)
+    bool Scene::collide(Vector2 p, Circle &circle, float duration)
     {
         Vector2 u = p - circle.location;
         float r = u.magnitude();
         if (r <= circle.radius) {
-            movePoint(p, ship, circle);
+            movePoint(p, circle, duration);
+            collidedObject = &circle;
+            ship.refVelocity = circle.velocity;
             return true;
+        } else {
+            collidedObject = nullptr;
+            return false;
         }
-        return false;
-    }
-
-    bool collide(Ship &ship, Circle circle)
-    {
-        return checkCollision(ship.location, ship, circle);
-        // Vector2 top;
-        // Vector2 bottomRight;
-        // Vector2 bottomLeft;
-        // bool collision;
-        // ship.getCorners(top, bottomRight, bottomLeft);
-        // collision = collidePoint(top, ship, circle);
-        // if (collision)
-        //     ship.getCorners(top, bottomRight, bottomLeft);
-        // collision = collision || collidePoint(bottomRight, ship, circle);
-        // if (collision)
-        //     ship.getCorners(top, bottomRight, bottomLeft);
-        // collision = collision || collidePoint(bottomLeft, ship, circle);
-        // return collision;
     }
 
     void addForce(Vector2 &force, Vector2 p1, Vector2 p2, float m1, float m2, float radius)
@@ -145,10 +128,6 @@ namespace Solar {
         fy -= m1 * m2 / (r*r);
         fx *= dx / r;
         fy *= dy / r;
-        if (r < radius) {
-            fx = 0.0f;
-            fy = 0.0f;
-        }
         force.x += fx;
         force.y += fy;
     }
@@ -156,40 +135,38 @@ namespace Solar {
     void Scene::update(double duration)
     {
         Vector2 force = ship.force;
+        ship.location += ship.refVelocity * duration;
 
-        addForce(force, ship.location, planet.location, ship.mass, planet.mass, planet.radius);
         planet.location += planet.velocity * duration;
+        addForce(force, ship.location, planet.location, ship.mass, planet.mass, planet.radius);
 
         for (auto &moon : moons) {
             moon.angle += duration;
-            float m = 1.0f / moon.distance;
+            float d = 0.5f;
+            float m = 1.0f / moon.distance * d;
             float n = moon.distance - moon.radius;
             moon.velocity = {
-                std::cos((moon.angle-n)*m),
-                -std::sin((moon.angle-n)*m)
+                std::cos((moon.angle-n)*m)*d,
+                -std::sin((moon.angle-n)*m)*d
             };
-            addForce(force, ship.location, moon.location, ship.mass, moon.mass, moon.radius);
+            moon.velocity += planet.velocity;
             moon.location += moon.velocity * duration;
+            addForce(force, ship.location, moon.location, ship.mass, moon.mass, moon.radius);
         }
 
         if (collidedObject) {
-            Vector2 n = (ship.location - collidedObject->location).normalize();
-            force -= n * dot(n, force);
+            Vector2 normal = (ship.location - collidedObject->location).normalize();
+            force -= normal * dot(force, normal);
         }
 
         ship.acceleration = force / ship.mass;
         ship.velocity += ship.acceleration * duration;
         ship.location += ship.velocity * duration;
 
-        if (!collide(ship, planet)) {
-            collidedObject = nullptr;
-            for (auto &moon: moons)
-                if (collide(ship, moon)) {
-                    collidedObject = &moon;
+        if (!collide(ship.location, planet, duration))
+            for (auto &moon : moons)
+                if (collide(ship.location, moon, duration))
                     break;
-                }
-        } else
-            collidedObject = &planet;
 
         updatePath();
     }
